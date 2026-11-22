@@ -1,0 +1,15 @@
+# AngelDl bot service — adjust WorkingDirectory/paths if you install elsewhere (see docs/DEPLOY.md)
+[Unit]
+Description=AngelDl Telegram downloader bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=/root/dlbot
+EnvironmentFile=/root/dlbot/.env
+ExecStart=/root/dlbot/venv/bin/python /root/dlbot/bot.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

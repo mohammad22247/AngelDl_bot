@@ -1,0 +1,21 @@
+# Secrets — NEVER commit these
+.env
+api.env
+*.env
+
+# Runtime data (users, premium, settings) — lives on the server, not in git
+data.db
+*.db
+*.db-journal
+*.log
+*.pid
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
