@@ -24,7 +24,7 @@
 git clone <repo-url> /root/dlbot && cd /root/dlbot
 python3 -m venv venv && venv/bin/pip install -r requirements.txt
 cp .env.example .env
-bash scripts/set-token.sh        # توکن را از BotFather وارد می‌کند (فقط روی سرور)
+bash scripts/set-token.sh        # همان‌جا در ترمینال توکن، آیدی عددی ادمین و کانال عضویت اجباری را می‌پرسد
 sudo cp systemd/dlbot.service /etc/systemd/system/
 sudo systemctl daemon-reload && sudo systemctl enable --now dlbot
 ```

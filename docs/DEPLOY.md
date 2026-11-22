@@ -15,8 +15,7 @@ git clone <repo-url> /root/dlbot && cd /root/dlbot
 apt update && apt install -y python3-venv ffmpeg
 python3 -m venv venv && venv/bin/pip install -r requirements.txt
 cp .env.example .env
-bash scripts/set-token.sh        # توکن را تایپ می‌کنید؛ در .env ذخیره می‌شود (chmod 600)
-# ADMIN_IDS و FORCE_CHANNELS را در .env تنظیم کنید
+bash scripts/set-token.sh        # در ترمینال از شما می‌پرسد: توکن ربات، آیدی عددی تلگرام ادمین، و کانال عضویت اجباری (پیش‌فرض @ange1Vpn) — همه در .env ذخیره می‌شوند (chmod 600)
 ```
 
 ## ۳. اجرا با systemd (پیشنهادی)
