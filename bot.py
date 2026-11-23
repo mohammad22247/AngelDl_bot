@@ -13,8 +13,10 @@ Config via env: BOT_TOKEN, FORCE_CHANNELS, FORCE_JOIN_URLS, ADMIN_IDS, LOCAL_BOT
 Long polling — no public port needed (except the local API server's own localhost port).
 """
 import asyncio
+import html as _html
 import logging
 import os
+import re as _re
 import sqlite3
 import tempfile
 import time
@@ -949,14 +951,35 @@ async def post_buttons_input(update: Update, context: ContextTypes.DEFAULT_TYPE,
     await post_preview(update.effective_chat.id, context, draft)
 
 
+def format_post_text(text: str):
+    """Render ``` fenced blocks as Telegram <pre> blocks (they show the
+    'copy code' button under the block). Returns (text, parse_mode).
+    Without fences the text is returned unchanged with no parse_mode."""
+    if "```" not in text:
+        return text, None
+    parts = text.split("```")
+    out = []
+    for i, part in enumerate(parts):
+        if i % 2 == 1:
+            # inside a fence: drop a one-word language tag on the first line
+            lines = part.split("\n", 1)
+            if len(lines) == 2 and lines[0].strip() and " " not in lines[0].strip():
+                part = lines[1]
+            out.append("<pre>" + _html.escape(part.strip("\n")) + "</pre>")
+        else:
+            out.append(_html.escape(part))
+    return "".join(out), "HTML"
+
+
 async def post_preview(chat_id: int, context: ContextTypes.DEFAULT_TYPE, draft: dict):
     """Send the exact post (with its keyboard) + a confirm row; moves draft to preview."""
     kb = post_keyboard(draft["buttons"])
+    text, mode = format_post_text(draft["text"])
     if draft["photo_file_id"]:
         await context.bot.send_photo(chat_id, draft["photo_file_id"],
-                                     caption=draft["text"] or None, reply_markup=kb)
+                                     caption=text or None, parse_mode=mode, reply_markup=kb)
     else:
-        await context.bot.send_message(chat_id, draft["text"], reply_markup=kb)
+        await context.bot.send_message(chat_id, text, parse_mode=mode, reply_markup=kb)
     await context.bot.send_message(
         chat_id, "👆 پیش‌نمایش پست — برای انتشار تأیید کنید:",
         reply_markup=InlineKeyboardMarkup([[
@@ -972,12 +995,13 @@ async def post_publish(q, context: ContextTypes.DEFAULT_TYPE, draft: dict):
         return
     channel = FORCE_CHANNELS[0]
     kb = post_keyboard(draft["buttons"])
+    text, mode = format_post_text(draft["text"])
     try:
         if draft["photo_file_id"]:
             sent = await context.bot.send_photo(channel, draft["photo_file_id"],
-                                                caption=draft["text"] or None, reply_markup=kb)
+                                                caption=text or None, parse_mode=mode, reply_markup=kb)
         else:
-            sent = await context.bot.send_message(channel, draft["text"], reply_markup=kb)
+            sent = await context.bot.send_message(channel, text, parse_mode=mode, reply_markup=kb)
     except Exception as e:
         log.exception("channel post publish failed")
         await q.message.reply_text(f"❌ انتشار ناموفق بود. مطمئن شوید ربات در {channel} ادمین است و اجازه‌ی پست دارد.\nخطا: {e}")
